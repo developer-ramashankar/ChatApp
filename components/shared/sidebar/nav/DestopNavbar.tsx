@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme/theme-toggle";
@@ -24,6 +25,9 @@ const DestopNavbar = () => {
                       <Button size={"icon"} variant={path.active ? "default" : "outline"}>
                         {path.icon}
                       </Button>
+                      {path.count ? (<Badge className=" absolute left-6 bottom-7 px-2">
+                        {path.count}
+                      </Badge>) :null}
                     </TooltipTrigger>
                     <TooltipContent>{path.name}</TooltipContent>
                   </Tooltip>

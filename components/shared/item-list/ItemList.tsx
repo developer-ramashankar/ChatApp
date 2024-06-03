@@ -22,7 +22,7 @@ const ItemList = ({ children, title, action: Action }: Props) => {
         <h1 className="text-2xl font-semibold tracking-tight  p-2">{title}</h1>
         {Action ? Action : null}
       </div>
-      <div className="w-full h-full flex flex-col items-center justify-start">
+      <div className="w-full h-full flex flex-col p-2 items-center justify-start">
         {children}
       </div>
     </Card>
