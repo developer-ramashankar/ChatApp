@@ -1,6 +1,8 @@
 import { ConvexError } from "convex/values";
 import { query } from "./_generated/server";
 import { getUserByClerkId } from "./_utils";
+import { QueryCtx, MutationCtx } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
 export const get = query({
   args: {},
@@ -38,9 +40,14 @@ export const get = query({
             q.eq("conversationId", conversation?._id)
           )
           .collect();
+          
+        const lastMsg = await lastMsgDetail({
+          ctx,
+          id: conversation.lastMsgId,
+        });
 
         if (conversation.isGroup) {
-          return { conversation };
+          return { conversation, lastMsg };
         } else {
           const otherMembership = allConversationMemberships.filter(
             (membership) => membership.memberId !== currentUser._id
@@ -49,6 +56,7 @@ export const get = query({
           return {
             conversation,
             otherMember,
+            lastMsg,
           };
         }
       })
@@ -56,3 +64,34 @@ export const get = query({
     return conversationWithDetails;
   },
 });
+
+const lastMsgDetail = async ({
+  ctx,
+  id,
+}: {
+  ctx: QueryCtx | MutationCtx;
+  id: Id<"messages"> | undefined;
+}) => {
+  if (!id) return null;
+  const message = await ctx.db.get(id);
+  if (!message) return null;
+  const sender = await ctx.db.get(message.senderId);
+  if (!sender) return null;
+  const content = getMessageContent(
+    message.type,
+    message.msg as unknown as string
+  );
+  return {
+    sender: sender.username,
+    content,
+  };
+};
+
+const getMessageContent = (type: string, msg: string) => {
+  switch (type) {
+    case "text":
+      return msg;
+    default:
+      return "[Non-text]";
+  }
+};
